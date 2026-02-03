@@ -1,0 +1,31 @@
+---
+title: "Player"
+format: html
+params:
+  player_name: "DEFAULT"
+---
+
+```{r}
+library(dplyr)
+library(readr)
+library(plotly)
+
+player_name <- params$player_name
+
+summary <- read_csv("data/derived/player_summary.csv", show_col_types = FALSE) %>%
+  filter(player == player_name)
+
+by_ls <- read_csv("data/derived/player_by_league_season.csv", show_col_types = FALSE) %>%
+  filter(player == player_name)
+
+bat_phase <- read_csv("data/derived/player_phase_batting.csv", show_col_types = FALSE) %>%
+  filter(player == player_name, league == "ALL", season == "ALL")
+
+bowl_phase <- read_csv("data/derived/player_phase_bowling.csv", show_col_types = FALSE) %>%
+  filter(player == player_name, league == "ALL", season == "ALL")
+
+summary
+
+plot_ly(bat_phase, x = ~phase, y = ~strike_rate, type = "bar", name = "Batting SR")
+plot_ly(bowl_phase, x = ~phase, y = ~economy_rate, type = "bar", name = "Bowling Econ")
+```

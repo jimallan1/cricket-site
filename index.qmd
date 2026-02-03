@@ -1,0 +1,12 @@
+---
+title: "T20 Analytics"
+format: html
+---
+
+Welcome to **T20 Analytics**, a lightweight site generated from the data pipeline in this repo.
+
+- Use the [Players](players.qmd) page for sortable leaderboards and to click through to player spotlights.
+- The [Leagues](leagues.qmd) page will house summaries and coverage by competition.
+- Player-specific dashboards live in player/ and pull from the CSVs in data/derived/.
+
+To rebuild the numbers, run your R script (3-02-2026/R Package.R) so it refreshes data/derived, then run quarto render here.

@@ -1,0 +1,24 @@
+---
+title: "Leagues"
+format: html
+---
+
+`{r}
+library(dplyr)
+library(readr)
+
+player_league <- read_csv("data/derived/player_by_league_season.csv", show_col_types = FALSE)
+
+league_summary <- player_league %>%
+  group_by(league, season) %>%
+  summarise(
+    players = n_distinct(player),
+    runs = sum(runs_scored, na.rm = TRUE),
+    wickets = sum(wickets, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+league_summary
+`
+
+_Add charts/tables here once you decide the exact comparisons you want._

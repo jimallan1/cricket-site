@@ -1,0 +1,30 @@
+---
+title: "Players"
+format: html
+---
+
+`{r}
+library(dplyr)
+library(reactable)
+library(readr)
+
+players <- read_csv("data/derived/player_summary.csv", show_col_types = FALSE)
+
+reactable(
+  players %>% arrange(desc(runs_scored_total)),
+  searchable = TRUE,
+  filterable = TRUE,
+  pagination = TRUE,
+  defaultPageSize = 25,
+  columns = list(
+    player = colDef(name = "Player"),
+    runs_scored_total = colDef(name = "Runs", format = colFormat(digits = 0)),
+    strike_rate_total = colDef(name = "SR", format = colFormat(digits = 1)),
+    average_total = colDef(name = "Avg", format = colFormat(digits = 1)),
+    wickets_total = colDef(name = "Wkts", format = colFormat(digits = 0)),
+    economy_total = colDef(name = "Econ", format = colFormat(digits = 2))
+  )
+)
+`
+
+Upgrade idea: wrap the player column with htmltools::tags() to point to /player/<slug>.html once you’re ready to generate individual pages.
