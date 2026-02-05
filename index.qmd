@@ -1,12 +1,179 @@
----
 title: "T20 Analytics"
 format: html
 ---
 
-Welcome to **T20 Analytics**, a lightweight site generated from the data pipeline in this repo.
+```{r setup, include=FALSE}
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(tidyr)
+library(scales)
+library(htmltools)
+library(forcats)
 
-- Use the [Players](players.qmd) page for sortable leaderboards and to click through to player spotlights.
-- The [Leagues](leagues.qmd) page will house summaries and coverage by competition.
-- Player-specific dashboards live in player/ and pull from the CSVs in data/derived/.
+player_summary <- read_csv("data/derived/player_summary.csv", show_col_types = FALSE)
+bat_phase <- read_csv("data/derived/player_phase_batting.csv", show_col_types = FALSE) %>%
+  filter(league == "ALL", season == "ALL")
+bowl_phase <- read_csv("data/derived/player_phase_bowling.csv", show_col_types = FALSE) %>%
+  filter(league == "ALL", season == "ALL")
 
-To rebuild the numbers, run your R script (3-02-2026/R Package.R) so it refreshes data/derived, then run quarto render here.
+theme_set(theme_minimal(base_family = "Inter"))
+```
+
+Welcome to **T20 Analytics**, a lightweight cockpit sitting on top of the Quarto/R workflow in this repo. Below are live snippets from the CSVs created by `R Package.R`.
+
+## Tournament Pulse
+
+```{r quick-metrics, echo=FALSE}
+metrics <- tibble(
+  label = c("Players Tracked", "Runs Logged", "Avg Strike Rate", "Wickets Logged"),
+  value = c(
+    n_distinct(player_summary$player),
+    sum(player_summary$runs_scored_total, na.rm = TRUE),
+    mean(player_summary$strike_rate_total, na.rm = TRUE),
+    sum(player_summary$wickets_total, na.rm = TRUE)
+  ),
+  format = c("comma", "comma", "number", "comma"),
+  suffix = c("", "", "", ""),
+  caption = c(
+    "Unique players with at least one T20 appearance across the competitions we ingest.",
+    "Total runs captured across all leagues/seasons in scope.",
+    "Mean strike rate for the tracked batters (ALL/ALL view).",
+    "Aggregate wickets credited to the bowlers in the data mart."
+  )
+)
+
+metric_value <- function(val, format) {
+  switch(format,
+         "comma" = comma(val),
+         "percent" = percent(val, accuracy = 0.1),
+         number(val, accuracy = 0.1))
+}
+
+div(
+  class = "metric-grid",
+  tagList(lapply(seq_len(nrow(metrics)), function(i) {
+    div(
+      class = "metric-card",
+      div(class = "metric-label", metrics$label[i]),
+      div(class = "metric-value", metric_value(metrics$value[i], metrics$format[i])),
+      div(class = "metric-caption", metrics$caption[i])
+    )
+  }))
+)
+```
+
+## Run Machines vs Wicket Hunters
+
+```{r dual-leaderboard, echo=FALSE, fig.width=10, fig.height=6}
+top_dual <- bind_rows(
+  player_summary %>%
+    slice_max(runs_scored_total, n = 10) %>%
+    transmute(player, metric = "Runs", value = runs_scored_total),
+  player_summary %>%
+    slice_max(wickets_total, n = 10) %>%
+    transmute(player, metric = "Wickets", value = wickets_total)
+) %>%
+  group_by(metric) %>%
+  mutate(player = reorder_within(player, value, metric)) %>%
+  ungroup()
+
+ggplot(top_dual, aes(value, player, fill = metric)) +
+  geom_col(show.legend = FALSE) +
+  scale_y_reordered() +
+  scale_fill_manual(values = c("Runs" = "#1f77b4", "Wickets" = "#d62728")) +
+  scale_x_continuous(labels = comma) +
+  facet_wrap(~metric, scales = "free_y") +
+  labs(
+    x = NULL, y = NULL,
+    title = "Leaders across the full data mart",
+    subtitle = "Runs show batting accumulation; wickets highlight bowling strike power."
+  )
+```
+
+## Phase Tempo
+
+T20 innings unfold in sharply different segments. The plots below aggregate every tracked ball (ALL leagues/seasons) to show how player behaviour shifts between Powerplay, Middle, and Death phases.
+
+```{r phase-tempo, echo=FALSE, fig.width=8, fig.height=4}
+bat_phase_summary <- bat_phase %>%
+  group_by(phase) %>%
+  summarise(
+    strike_rate = mean(strike_rate, na.rm = TRUE),
+    boundary_pct = mean(boundary_pct, na.rm = TRUE) * 100,
+    .groups = "drop"
+  ) %>%
+  pivot_longer(-phase, names_to = "stat", values_to = "value") %>%
+  mutate(
+    stat = recode(stat,
+                  strike_rate = "Strike Rate",
+                  boundary_pct = "Boundary %")
+  )
+
+ggplot(bat_phase_summary, aes(phase, value, color = stat, group = stat)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c("Strike Rate" = "#17becf", "Boundary %" = "#ff7f0e")) +
+  labs(x = NULL, y = NULL, color = NULL,
+       title = "Batting gears by phase",
+       subtitle = "Strike rate lifts late, while boundary share dips in the squeeze overs.") +
+  theme(legend.position = "top")
+```
+
+```{r bowling-tempo, echo=FALSE, fig.width=8, fig.height=4}
+bowl_phase_summary <- bowl_phase %>%
+  group_by(phase) %>%
+  summarise(
+    economy = mean(economy_rate, na.rm = TRUE),
+    dot_pct = mean(dot_ball_percentage, na.rm = TRUE) * 100,
+    boundary_pct = mean(boundary_conceded_percentage, na.rm = TRUE) * 100,
+    .groups = "drop"
+  ) %>%
+  pivot_longer(-phase, names_to = "stat", values_to = "value") %>%
+  mutate(
+    stat = recode(stat,
+                  economy = "Economy",
+                  dot_pct = "Dot %",
+                  boundary_pct = "Boundary % conceded")
+  )
+
+ggplot(bowl_phase_summary, aes(phase, value, color = stat, group = stat)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c("Economy" = "#9467bd", "Dot %" = "#2ca02c", "Boundary % conceded" = "#e377c2")) +
+  labs(x = NULL, y = NULL, color = NULL,
+       title = "Bowling control by phase",
+       subtitle = "Dot-ball pressure peaks late as teams chase, while economy balloons at the death.") +
+  theme(legend.position = "top")
+```
+
+## Styles In Focus
+
+```{r style-mix, echo=FALSE, fig.width=8, fig.height=4}
+style_mix <- player_summary %>%
+  filter(!is.na(bowling_style) & bowling_style != "") %>%
+  group_by(bowling_style) %>%
+  summarise(
+    wickets = sum(wickets_total, na.rm = TRUE),
+    players = n_distinct(player),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(wickets)) %>%
+  slice_head(n = 8) %>%
+  mutate(bowling_style = forcats::fct_reorder(bowling_style, wickets))
+
+ggplot(style_mix, aes(wickets, bowling_style)) +
+  geom_col(fill = "#bcbd22") +
+  geom_text(aes(label = paste0(wickets, " wkts / ", players, " bowlers")),
+            hjust = 1, color = "white", fontface = "bold") +
+  labs(
+    x = NULL, y = NULL,
+    title = "Which bowling styles have taken the most wickets?",
+    subtitle = "Counts are cumulative across every tracked league & season."
+  ) +
+  theme(axis.text.y = element_text(face = "bold"))
+```
+
+---
+
+To rebuild the feeds, run `R Package.R` from the repo root to refresh `data/derived`, then execute `quarto render` inside `cricket-site/`.

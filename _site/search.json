@@ -1,0 +1,30 @@
+[
+  {
+    "objectID": "players.html",
+    "href": "players.html",
+    "title": "Players",
+    "section": "",
+    "text": "`{r} library(dplyr) library(reactable) library(readr)\nplayers &lt;- read_csv(“data/derived/player_summary.csv”, show_col_types = FALSE)\nreactable( players %&gt;% arrange(desc(runs_scored_total)), searchable = TRUE, filterable = TRUE, pagination = TRUE, defaultPageSize = 25, columns = list( player = colDef(name = “Player”), runs_scored_total = colDef(name = “Runs”, format = colFormat(digits = 0)), strike_rate_total = colDef(name = “SR”, format = colFormat(digits = 1)), average_total = colDef(name = “Avg”, format = colFormat(digits = 1)), wickets_total = colDef(name = “Wkts”, format = colFormat(digits = 0)), economy_total = colDef(name = “Econ”, format = colFormat(digits = 2)) ) ) `\nUpgrade idea: wrap the player column with htmltools::tags() to point to /player/.html once you�re ready to generate individual pages."
+  },
+  {
+    "objectID": "leagues.html",
+    "href": "leagues.html",
+    "title": "Leagues",
+    "section": "",
+    "text": "`{r} library(dplyr) library(readr)\nplayer_league &lt;- read_csv(“data/derived/player_by_league_season.csv”, show_col_types = FALSE)\nleague_summary &lt;- player_league %&gt;% group_by(league, season) %&gt;% summarise( players = n_distinct(player), runs = sum(runs_scored, na.rm = TRUE), wickets = sum(wickets, na.rm = TRUE), .groups = “drop” )\nleague_summary `\nAdd charts/tables here once you decide the exact comparisons you want."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "T20 Analytics",
+    "section": "",
+    "text": "Welcome to T20 Analytics, a lightweight site generated from the data pipeline in this repo.\n\nUse the Players page for sortable leaderboards and to click through to player spotlights.\nThe Leagues page will house summaries and coverage by competition.\nPlayer-specific dashboards live in player/ and pull from the CSVs in data/derived/.\n\nTo rebuild the numbers, run your R script (3-02-2026/R Package.R) so it refreshes data/derived, then run quarto render here."
+  },
+  {
+    "objectID": "player-template.html",
+    "href": "player-template.html",
+    "title": "Player",
+    "section": "",
+    "text": "library(dplyr)\n\nWarning: package 'dplyr' was built under R version 4.4.2\n\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nlibrary(readr)\n\nWarning: package 'readr' was built under R version 4.4.2\n\nlibrary(plotly)\n\nWarning: package 'plotly' was built under R version 4.4.3\n\n\nLoading required package: ggplot2\n\n\nWarning: package 'ggplot2' was built under R version 4.4.2\n\n\n\nAttaching package: 'plotly'\n\n\nThe following object is masked from 'package:ggplot2':\n\n    last_plot\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\nThe following object is masked from 'package:graphics':\n\n    layout\n\nplayer_name &lt;- params$player_name\n\nsummary &lt;- read_csv(\"data/derived/player_summary.csv\", show_col_types = FALSE) %&gt;%\n  filter(player == player_name)\n\nby_ls &lt;- read_csv(\"data/derived/player_by_league_season.csv\", show_col_types = FALSE) %&gt;%\n  filter(player == player_name)\n\nbat_phase &lt;- read_csv(\"data/derived/player_phase_batting.csv\", show_col_types = FALSE) %&gt;%\n  filter(player == player_name, league == \"ALL\", season == \"ALL\")\n\nbowl_phase &lt;- read_csv(\"data/derived/player_phase_bowling.csv\", show_col_types = FALSE) %&gt;%\n  filter(player == player_name, league == \"ALL\", season == \"ALL\")\n\nsummary\n\n# A tibble: 0 × 22\n# ℹ 22 variables: player &lt;chr&gt;, leagues_covered &lt;dbl&gt;, seasons_covered &lt;dbl&gt;,\n#   matches_played_total &lt;dbl&gt;, balls_faced_total &lt;dbl&gt;,\n#   runs_scored_total &lt;dbl&gt;, dismissals_total &lt;dbl&gt;, strike_rate_total &lt;dbl&gt;,\n#   average_total &lt;dbl&gt;, boundaries_4s_total &lt;dbl&gt;, boundaries_6s_total &lt;dbl&gt;,\n#   fifties_total &lt;dbl&gt;, hundreds_total &lt;dbl&gt;, matches_bowled_total &lt;dbl&gt;,\n#   balls_bowled_total &lt;dbl&gt;, runs_conceded_total &lt;dbl&gt;, wickets_total &lt;dbl&gt;,\n#   economy_total &lt;dbl&gt;, bowling_average_total &lt;dbl&gt;, …\n\nplot_ly(bat_phase, x = ~phase, y = ~strike_rate, type = \"bar\", name = \"Batting SR\")\n\n\n\n\nplot_ly(bowl_phase, x = ~phase, y = ~economy_rate, type = \"bar\", name = \"Bowling Econ\")"
+  }
+]

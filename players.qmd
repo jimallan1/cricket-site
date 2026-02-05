@@ -3,28 +3,143 @@ title: "Players"
 format: html
 ---
 
-`{r}
+```{r setup, include=FALSE}
 library(dplyr)
-library(reactable)
 library(readr)
+library(reactable)
+library(scales)
+library(stringr)
+library(tidyr)
+library(htmltools)
+library(ggplot2)
+library(ggrepel)
 
-players <- read_csv("data/derived/player_summary.csv", show_col_types = FALSE)
+slugify <- function(name) {
+  stringr::str_to_lower(name) |>
+    stringr::str_replace_all("[^a-z0-9]+", "-") |>
+    stringr::str_replace_all("(^-|-$)", "")
+}
 
+players <- read_csv("data/derived/player_summary.csv", show_col_types = FALSE) %>%
+  mutate(
+    impact_raw = runs_scored_total + 25 * coalesce(wickets_total, 0),
+    impact_score = if (diff(range(impact_raw, na.rm = TRUE)) == 0) 75 else scales::rescale(impact_raw, to = c(60, 99)),
+    slug = slugify(player),
+    player_link = sprintf("<a href='player/%s.html'>%s</a>", slug, player)
+  )
+
+phase_bat <- read_csv("data/derived/player_phase_batting.csv", show_col_types = FALSE) %>%
+  filter(league == "ALL", season == "ALL")
+phase_bowl <- read_csv("data/derived/player_phase_bowling.csv", show_col_types = FALSE) %>%
+  filter(league == "ALL", season == "ALL")
+```
+
+## Player Locator
+
+Search, filter, or sort to jump to any player. Impact score blends batting volume and wicket-taking to bubble up star all-rounders. Clicking a name routes to the corresponding player page when generated.
+
+```{r player-table, echo=FALSE}
 reactable(
-  players %>% arrange(desc(runs_scored_total)),
+  players,
   searchable = TRUE,
   filterable = TRUE,
-  pagination = TRUE,
   defaultPageSize = 25,
+  pagination = TRUE,
+  fullWidth = TRUE,
+  defaultSorted = "impact_score",
+  defaultSortOrder = "desc",
   columns = list(
-    player = colDef(name = "Player"),
+    player_link = colDef(name = "Player", html = TRUE),
     runs_scored_total = colDef(name = "Runs", format = colFormat(digits = 0)),
     strike_rate_total = colDef(name = "SR", format = colFormat(digits = 1)),
     average_total = colDef(name = "Avg", format = colFormat(digits = 1)),
     wickets_total = colDef(name = "Wkts", format = colFormat(digits = 0)),
-    economy_total = colDef(name = "Econ", format = colFormat(digits = 2))
+    economy_total = colDef(name = "Econ", format = colFormat(digits = 2)),
+    bowling_style = colDef(name = "Bowling Style"),
+    impact_score = colDef(
+      name = "Impact",
+      format = colFormat(digits = 0)
+    ),
+    slug = colDef(show = FALSE),
+    impact_raw = colDef(show = FALSE)
   )
 )
-`
+```
 
-Upgrade idea: wrap the player column with htmltools::tags() to point to /player/<slug>.html once you’re ready to generate individual pages.
+## Finishers' Lounge
+
+Which batters are the scariest at the death? We filter to players with at least 180 balls in the death overs and spotlight the top strike rates.
+
+```{r death-finishers, echo=FALSE, fig.width=8, fig.height=5}
+death_finishers <- phase_bat %>%
+  filter(phase == "Death", balls_faced >= 180) %>%
+  arrange(desc(strike_rate)) %>%
+  slice_head(n = 12) %>%
+  mutate(player = reorder(player, strike_rate))
+
+ggplot(death_finishers, aes(strike_rate, player)) +
+  geom_col(fill = "#ff7f0e") +
+  geom_text(aes(label = sprintf("%.1f SR over %s balls", strike_rate, scales::comma(balls_faced))),
+            hjust = 1.02, color = "white", size = 3.2) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
+  labs(
+    x = NULL, y = NULL,
+    title = "Death-over strike rate leaders",
+    subtitle = "Minimum 180 balls in overs 15-20"
+  ) +
+  theme_minimal(base_family = "Inter") +
+  theme(axis.text.y = element_text(face = "bold"))
+```
+
+## New-ball Controllers
+
+Here are the bowlers who keep things tight up front. We require at least 120 balls in the Powerplay and highlight those combining miserly economy with elite dot-ball rates.
+
+```{r powerplay-bowlers, echo=FALSE, fig.width=8, fig.height=5}
+powerplay_kings <- phase_bowl %>%
+  filter(phase == "Powerplay", balls_bowled >= 120) %>%
+  mutate(
+    dot_pct = dot_ball_percentage * 100,
+    wickets = coalesce(wickets, 0)
+  ) %>%
+  arrange(economy_rate) %>%
+  slice_head(n = 15)
+
+ggplot(powerplay_kings, aes(economy_rate, dot_pct, size = balls_bowled, color = wickets)) +
+  geom_point(alpha = 0.85) +
+  scale_size_continuous(range = c(3, 11), guide = "none") +
+  scale_color_gradient(low = "#1fa187", high = "#ff005c", name = "Wickets") +
+  labs(
+    x = "Economy (runs/over)",
+    y = "Dot-ball %",
+    title = "Powerplay bowling efficiency",
+    subtitle = "Bigger bubbles = more balls bowled"
+  ) +
+  ggrepel::geom_text_repel(aes(label = player), size = 3, max.overlaps = 15)
+```
+
+## Styles Watchlist
+
+```{r style-table, echo=FALSE}
+style_table <- players %>%
+  filter(!is.na(bowling_style) & bowling_style != "") %>%
+  group_by(bowling_style) %>%
+  summarise(
+    players = n(),
+    wickets = sum(wickets_total, na.rm = TRUE),
+    avg_economy = mean(economy_total, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(wickets))
+
+reactable(
+  style_table,
+  columns = list(
+    bowling_style = colDef(name = "Style"),
+    players = colDef(name = "Players"),
+    wickets = colDef(name = "Wickets", format = colFormat(digits = 0)),
+    avg_economy = colDef(name = "Avg Econ", format = colFormat(digits = 2))
+  ),
+  defaultPageSize = 8
+)
+```
