@@ -10,7 +10,6 @@ library(tidyr)
 library(scales)
 library(htmltools)
 library(forcats)
-library(tidytext)
 
 player_summary <- read_csv("data/derived/player_summary.csv", show_col_types = FALSE)
 bat_phase <- read_csv("data/derived/player_phase_batting.csv", show_col_types = FALSE) %>%
@@ -19,6 +18,15 @@ bowl_phase <- read_csv("data/derived/player_phase_bowling.csv", show_col_types =
   filter(league == "ALL", season == "ALL")
 
 theme_set(theme_minimal(base_family = "Inter"))
+
+reorder_within_local <- function(x, by, within, sep = "___", fun = mean, ...) {
+  new_x <- paste(within, x, sep = sep)
+  stats::reorder(new_x, by, FUN = fun)
+}
+
+scale_y_reordered_local <- function(..., sep = "___") {
+  ggplot2::scale_y_discrete(labels = function(x) gsub(paste0("^.*", sep), "", x), ...)
+}
 ```
 
 Welcome to **T20 Analytics**, a lightweight cockpit sitting on top of the Quarto/R workflow in this repo. Below are live snippets from the CSVs created by `R Package.R`.
@@ -76,12 +84,12 @@ top_dual <- bind_rows(
     transmute(player, metric = "Wickets", value = wickets_total)
 ) %>%
   group_by(metric) %>%
-  mutate(player = reorder_within(player, value, metric)) %>%
+  mutate(player = reorder_within_local(player, value, metric)) %>%
   ungroup()
 
 ggplot(top_dual, aes(value, player, fill = metric)) +
   geom_col(show.legend = FALSE) +
-  scale_y_reordered() +
+  scale_y_reordered_local() +
   scale_fill_manual(values = c("Runs" = "#1f77b4", "Wickets" = "#d62728")) +
   scale_x_continuous(labels = comma) +
   facet_wrap(~metric, scales = "free_y") +
