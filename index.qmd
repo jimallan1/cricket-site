@@ -10,6 +10,7 @@ library(tidyr)
 library(scales)
 library(htmltools)
 library(forcats)
+library(tidytext)
 
 player_summary <- read_csv("data/derived/player_summary.csv", show_col_types = FALSE)
 bat_phase <- read_csv("data/derived/player_phase_batting.csv", show_col_types = FALSE) %>%
