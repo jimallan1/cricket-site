@@ -113,40 +113,187 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tournament-pulse" id="toc-tournament-pulse" class="nav-link active" data-scroll-target="#tournament-pulse">Tournament Pulse</a></li>
+  <li><a href="#run-machines-vs-wicket-hunters" id="toc-run-machines-vs-wicket-hunters" class="nav-link" data-scroll-target="#run-machines-vs-wicket-hunters">Run Machines vs Wicket Hunters</a></li>
+  <li><a href="#phase-tempo" id="toc-phase-tempo" class="nav-link" data-scroll-target="#phase-tempo">Phase Tempo</a></li>
+  <li><a href="#styles-in-focus" id="toc-styles-in-focus" class="nav-link" data-scroll-target="#styles-in-focus">Styles In Focus</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">T20 Analytics</h1>
+
+
+
+<p>title: “T20 Analytics” format: html —</p>
+<p>Welcome to <strong>T20 Analytics</strong>, a lightweight cockpit sitting on top of the Quarto/R workflow in this repo. Below are live snippets from the CSVs created by <code>R Package.R</code>.</p>
+<section id="tournament-pulse" class="level2">
+<h2 class="anchored" data-anchor-id="tournament-pulse">Tournament Pulse</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div class="metric-grid">
+<div class="metric-card">
+<div class="metric-label">Players Tracked</div>
+<div class="metric-value">2,296</div>
+<div class="metric-caption">Unique players with at least one T20 appearance across the competitions we ingest.</div>
 </div>
+<div class="metric-card">
+<div class="metric-label">Runs Logged</div>
+<div class="metric-value">954,643</div>
+<div class="metric-caption">Total runs captured across all leagues/seasons in scope.</div>
+</div>
+<div class="metric-card">
+<div class="metric-label">Avg Strike Rate</div>
+<div class="metric-value">-Inf</div>
+<div class="metric-caption">Mean strike rate for the tracked batters (ALL/ALL view).</div>
+</div>
+<div class="metric-card">
+<div class="metric-label">Wickets Logged</div>
+<div class="metric-value">39,823</div>
+<div class="metric-caption">Aggregate wickets credited to the bowlers in the data mart.</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="run-machines-vs-wicket-hunters" class="level2">
+<h2 class="anchored" data-anchor-id="run-machines-vs-wicket-hunters">Run Machines vs Wicket Hunters</h2>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grid.Call(C_stringMetric, as.graphicsAnnot(x$label)): font family
+not found in Windows font database
+Warning in grid.Call(C_stringMetric, as.graphicsAnnot(x$label)): font family
+not found in Windows font database
+Warning in grid.Call(C_stringMetric, as.graphicsAnnot(x$label)): font family
+not found in Windows font database</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database
+Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database
+Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database
+Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/dual-leaderboard-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="phase-tempo" class="level2">
+<h2 class="anchored" data-anchor-id="phase-tempo">Phase Tempo</h2>
+<p>T20 innings unfold in sharply different segments. The plots below aggregate every tracked ball (ALL leagues/seasons) to show how player behaviour shifts between Powerplay, Middle, and Death phases.</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2 rows containing missing values or values outside the scale range
+(`geom_line()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database
+Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database
+Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database
+Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database
+Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/phase-tempo-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database
+Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database
+Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database
+Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database
+Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/bowling-tempo-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="styles-in-focus" class="level2">
+<h2 class="anchored" data-anchor-id="styles-in-focus">Styles In Focus</h2>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database
+Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database
+Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database
+Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+family not found in Windows font database</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database
+Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database
+Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database
+Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+font family not found in Windows font database</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/style-mix-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>To rebuild the feeds, run <code>R Package.R</code> from the repo root to refresh <code>data/derived</code>, then execute <code>quarto render</code> inside <code>cricket-site/</code>.</p>
 
 
-
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p>Welcome to <strong>T20 Analytics</strong>, a lightweight site generated from the data pipeline in this repo.</p>
-<ul>
-<li>Use the <a href="./players.html">Players</a> page for sortable leaderboards and to click through to player spotlights.</li>
-<li>The <a href="./leagues.html">Leagues</a> page will house summaries and coverage by competition.</li>
-<li>Player-specific dashboards live in player/ and pull from the CSVs in data/derived/.</li>
-</ul>
-<p>To rebuild the numbers, run your R script (3-02-2026/R Package.R) so it refreshes data/derived, then run quarto render here.</p>
-
-
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

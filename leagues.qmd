@@ -55,7 +55,7 @@ heat_data <- league_season %>%
 
 ggplot(heat_data, aes(season, league, fill = runs)) +
   geom_tile(color = "white") +
-  scale_fill_gradient(low = "#e0f3ff", high = "#00509d", labels = label_number_si()) +
+  scale_fill_gradient(low = "#e0f3ff", high = "#00509d", labels = label_number(big.mark = ",")) +
   labs(
     x = "Season",
     y = NULL,
